@@ -27,6 +27,7 @@ public class Engine {
     public enum State {
         DONE, BUILDING_OPERAND, OPERATOR, ERROR;
     }
+    // Enumeration of the type of input symbols.
     public enum Input {
         NUMBER, OPERATION, EQUALS;
     }
@@ -77,7 +78,7 @@ public class Engine {
     /**
      * The '=' button was pressed.
      */
-    public void equals() {
+    public void applyEquals() {
         // State transition.
         state = transitions.get(Input.EQUALS, state);
         // If we are not in an error state, the engine preforms the operation.
@@ -93,7 +94,13 @@ public class Engine {
      * @param number The on digit number related to the pressed button.
      */
     public void numberPressed(int number) {
-        valueOnScreen = valueOnScreen*10 + number;
+        if(!state.equals(State.OPERATOR))
+            // Insert the digit.
+            valueOnScreen = valueOnScreen*10 + number;
+        else {
+            valueOnScreen = number;
+        }
+        state = transitions.get(Input.NUMBER, state);
     }
 
     private void calculateResult() {
@@ -126,6 +133,7 @@ public class Engine {
     private void applyOperator(char operator) {
         // State transition when applying an operator.
         state = transitions.get(Input.OPERATION, state);
+        System.out.println(state);
         if(state.equals(State.ERROR)) {
             keySequenceError();
             return;
@@ -149,6 +157,15 @@ public class Engine {
     }
 
     /**
+     * The clear button has been pressed.
+     */
+    public void clear() {
+        lastOperator = ' ';
+        state = State.DONE;
+        valueOnScreen = 0;
+    }
+
+    /**
      * Sets up all the transitions of the finite state machine.
      */
     private void setUpTransitions() {
@@ -156,24 +173,12 @@ public class Engine {
         transitions.put(Input.NUMBER, State.DONE, State.BUILDING_OPERAND);
         transitions.put(Input.NUMBER, State.BUILDING_OPERAND, State.BUILDING_OPERAND);
         transitions.put(Input.NUMBER, State.OPERATOR, State.BUILDING_OPERAND);
-        //transitions.put(Input.NUMBER, State.ERROR, State.DONE);
         transitions.put(Input.OPERATION, State.DONE, State.ERROR);
         transitions.put(Input.OPERATION, State.BUILDING_OPERAND, State.OPERATOR);
         transitions.put(Input.OPERATION, State.OPERATOR, State.ERROR);
-        //transitions.put(Input.OPERATION, State.ERROR, State.DONE);
         transitions.put(Input.EQUALS, State.DONE, State.ERROR);
         transitions.put(Input.EQUALS, State.BUILDING_OPERAND, State.DONE);
         transitions.put(Input.EQUALS, State.OPERATOR, State.ERROR);
-        //transitions.put(Input.EQUALS, State.ERROR, State.DONE);
-    }
-
-    /**
-     * The clear button has been pressed.
-     */
-    public void clear() {
-        lastOperator = ' ';
-        state = State.DONE;
-        valueOnScreen = 0;
     }
 
 }
