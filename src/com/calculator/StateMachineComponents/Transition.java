@@ -28,7 +28,7 @@ public class Transition {
      * @param currentState The state element of the DoubleKey.
      * @return The state correponding to the double key whose instance variables are the two parameters.
      */
-    private Engine.State get(Engine.Input input, Engine.State currentState) {
+    public Engine.State get(Engine.Input input, Engine.State currentState) {
          return map.get(new DoubleKey(input, currentState));
     }
 }
