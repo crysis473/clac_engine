@@ -1,4 +1,4 @@
-package com.calculator.StateMachineElements;
+package com.calculator.StateMachineComponents;
 
 import com.calculator.Engine;
 

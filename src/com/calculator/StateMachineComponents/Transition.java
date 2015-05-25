@@ -1,4 +1,4 @@
-package com.calculator.StateMachineElements;
+package com.calculator.StateMachineComponents;
 
 import com.calculator.Engine;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by user on 25/05/2015.
  */
-public class HashMapDoubleKey {
+public class Transition {
     // This HashMap modelize a state transition.
     private Map<DoubleKey, Engine.State> map = new HashMap<>();
 
