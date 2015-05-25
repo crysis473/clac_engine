@@ -43,5 +43,15 @@ public class Engine {
         valueOnScreen = valueOnScreen*10 + number;
     }
 
+    /**
+     * The clear button has been pressed.
+     */
+    public void clear() {
+        valueOnScreen = 0;
+    }
+
+    public void addition() {
+
+    }
 }
 
