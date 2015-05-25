@@ -5,25 +5,32 @@ package com.calculator;
  */
 
 /**
- * Handles and preforms arithmetical operations entered by user via the command line or/and the
+ * Handles all arithmetical operations entered by user via the command line or/and the
  * graphical interface.
  */
 public class Engine {
 
-    // The symbole of the operation to preform.
-    private char operationSymbol;
+    // The previous operation symbol pressed by the user.
+    private char lastOperator;
     // The result of the operation.
     private int valueOnScreen;
     // The operand of the operation.
     private int operand;
+    // Current state of the engine.
+    private State state;
+    // Enumeration of the states of the engine.
+    public enum State {
+        DONE, BUILDING_OPERAND, OPERATOR, ERROR;
+    }
+    public enum Input {
+        NUMBER, OPERATION, EQUALS;
+    }
 
     /**
      * Instanciates an Engine.
      */
     public Engine() {
-        valueOnScreen = 0;
-        operationSymbol = ' ';
-        operand = 0;
+        clear();
     }
 
     /**
@@ -47,11 +54,10 @@ public class Engine {
      * The clear button has been pressed.
      */
     public void clear() {
+        lastOperator = ' ';
+        state = State.DONE;
         valueOnScreen = 0;
     }
 
-    public void addition() {
-
-    }
 }
 
