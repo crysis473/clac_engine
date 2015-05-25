@@ -4,6 +4,8 @@ package com.calculator;
  * Created by user on 25/05/2015.
  */
 
+import com.calculator.StateMachineElements.HashMapDoubleKey;
+
 /**
  * Handles all arithmetical operations entered by user via the command line or/and the
  * graphical interface.
@@ -18,6 +20,8 @@ public class Engine {
     private int operand;
     // Current state of the engine.
     private State state;
+    // Contains all the state transitions of the FSM.
+    private HashMapDoubleKey transitions;
     // Enumeration of the states of the engine.
     public enum State {
         DONE, BUILDING_OPERAND, OPERATOR, ERROR;
@@ -30,6 +34,7 @@ public class Engine {
      * Instanciates an Engine.
      */
     public Engine() {
+        setUpTransitions();
         clear();
     }
 
@@ -57,6 +62,14 @@ public class Engine {
         lastOperator = ' ';
         state = State.DONE;
         valueOnScreen = 0;
+    }
+
+    public void setUpTransitions() {
+        transitions = new HashMapDoubleKey();
+        transitions.put(Input.NUMBER, State.DONE, State.BUILDING_OPERAND);
+        transitions.put(Input.OPERATION, State.DONE, State.ERROR);
+        transitions.put(Input.NUMBER, State.BUILDING_OPERAND, State.BUILDING_OPERAND);
+        transitions.put(Input.OPERATION, State.BUILDING_OPERAND, State.OPERATOR);
     }
 
 }
