@@ -1,4 +1,4 @@
-package com.calculator;
+package com.calculator.commandLine;
 
 import java.util.Scanner;
 

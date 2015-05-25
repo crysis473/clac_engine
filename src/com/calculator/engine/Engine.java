@@ -1,10 +1,11 @@
-package com.calculator;
+package com.calculator.engine;
 
 /**
  * Created by user on 25/05/2015.
  */
 
-import com.calculator.StateMachineComponents.Transition;
+import com.calculator.mathematicalUnit.MathematicalUnit;
+import com.calculator.stateMachineComponents.Transition;
 
 /**
  * Handles all arithmetical operations entered by user via the command line or/and the
@@ -112,6 +113,7 @@ public class Engine {
             case '-':
                 valueOnScreen = MathematicalUnit.substraction(leftOperand, valueOnScreen);
                 leftOperand = valueOnScreen;
+                break;
             case '*':
                 valueOnScreen = MathematicalUnit.multiplication(leftOperand, valueOnScreen);
                 leftOperand = valueOnScreen;
@@ -133,7 +135,7 @@ public class Engine {
     private void applyOperator(char operator) {
         // State transition when applying an operator.
         state = transitions.get(Input.OPERATION, state);
-        System.out.println(state);
+
         if(state.equals(State.ERROR)) {
             keySequenceError();
             return;
@@ -141,9 +143,8 @@ public class Engine {
 
         if(lastOperator != ' ')
             calculateResult();
-        else {
+        else
             leftOperand = valueOnScreen;
-        }
 
         lastOperator = operator;
     }

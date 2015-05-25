@@ -1,4 +1,4 @@
-package com.calculator;
+package com.calculator.mathematicalUnit;
 
 /**
  * This class preforms all the mathematical operations.

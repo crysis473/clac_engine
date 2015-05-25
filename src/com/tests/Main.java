@@ -1,6 +1,6 @@
 package com.tests;
 
-import com.calculator.Engine;
+import com.calculator.engine.Engine;
 
 /**
  * Created by user on 25/05/2015.
@@ -15,6 +15,12 @@ public class Main {
         engine.plus();
         engine.numberPressed(3);
         System.out.println(engine.getValueOnScreen());
+        engine.plus();
+        System.out.println(engine.getValueOnScreen());
+        engine.numberPressed(3);
+        engine.numberPressed(3);
+        System.out.println(engine.getValueOnScreen());
+        engine.applyEquals();
         engine.plus();
         System.out.println(engine.getValueOnScreen());
     }
