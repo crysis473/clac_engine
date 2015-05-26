@@ -1,6 +1,6 @@
-package com.calculator.StateMachineComponents;
+package com.calculator.stateMachineComponents;
 
-import com.calculator.Engine;
+import com.calculator.engine.Engine;
 
 import java.util.HashMap;
 import java.util.Map;

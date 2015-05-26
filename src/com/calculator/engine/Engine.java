@@ -5,7 +5,12 @@ package com.calculator.engine;
  */
 
 import com.calculator.mathematicalUnit.MathematicalUnit;
+import com.calculator.stateMachineComponents.DoubleKey;
 import com.calculator.stateMachineComponents.Transition;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * Handles all arithmetical operations entered by user via the command line or/and the
@@ -16,14 +21,15 @@ public class Engine {
     // The previous operation symbol pressed by the user.
     private char lastOperator;
     // The result of the operation.
-    private double valueOnScreen;
+    private double displayValue;
     // The operand of the operation.
     private double leftOperand;
     // Current state of the engine.
     private State state;
     // Contains all the state transitions of the FSM.
     private Transition transitions;
-
+    // The non zero decimal digits number to be printed after the decimal point.
+    private int fractionDigitsNumber;
     // Enumeration of the states of the engine.
     public enum State {
         DONE, BUILDING_OPERAND, OPERATOR, ERROR;
@@ -39,13 +45,29 @@ public class Engine {
     public Engine() {
         setUpTransitions();
         clear();
+        // By default, the number of non null digits to be printed after the decimal point is 3.
+        setFractionDigitsNumber(3);
     }
 
     /**
      * @return The result of the operation or "0" if no operation has been preformed yet.
      */
-    public double getValueOnScreen() {
-        return valueOnScreen;
+    public String getDisplayValue() {
+        /* If diplayValue can be cast to an integer without loss of precision,
+        we print the integer value without the decimal part.
+         */
+        if(displayValue == (int)displayValue)
+            return "" + (int)displayValue;
+
+        /* If the diplayValue cannot be cast into an integer without loss of precision,
+        we print the double value with the specified number of fractions digits.
+         */
+        DecimalFormat df = new DecimalFormat();
+        df.setMinimumFractionDigits(fractionDigitsNumber);
+        df.setMaximumFractionDigits(fractionDigitsNumber);
+
+        String str = df.format(displayValue).replaceAll(",",".");
+        return str;
     }
 
     /**
@@ -95,11 +117,14 @@ public class Engine {
      * @param number The on digit number related to the pressed button.
      */
     public void numberPressed(int number) {
-        if(!state.equals(State.OPERATOR))
+        if(!state.equals(State.OPERATOR)) {
+            if(state.equals(State.DONE))
+                clear();
             // Insert the digit.
-            valueOnScreen = valueOnScreen*10 + number;
+            displayValue = displayValue *10 + number;
+        }
         else {
-            valueOnScreen = number;
+            displayValue = number;
         }
         state = transitions.get(Input.NUMBER, state);
     }
@@ -107,20 +132,20 @@ public class Engine {
     private void calculateResult() {
         switch(lastOperator) {
             case '+':
-                valueOnScreen = MathematicalUnit.addition(leftOperand, valueOnScreen);
-                leftOperand = valueOnScreen;
+                displayValue = MathematicalUnit.addition(leftOperand, displayValue);
+                leftOperand = displayValue;
                 break;
             case '-':
-                valueOnScreen = MathematicalUnit.substraction(leftOperand, valueOnScreen);
-                leftOperand = valueOnScreen;
+                displayValue = MathematicalUnit.substraction(leftOperand, displayValue);
+                leftOperand = displayValue;
                 break;
             case '*':
-                valueOnScreen = MathematicalUnit.multiplication(leftOperand, valueOnScreen);
-                leftOperand = valueOnScreen;
+                displayValue = MathematicalUnit.multiplication(leftOperand, displayValue);
+                leftOperand = displayValue;
                 break;
             case '/':
-                valueOnScreen = MathematicalUnit.division(leftOperand, valueOnScreen);
-                leftOperand = valueOnScreen;
+                displayValue = MathematicalUnit.division(leftOperand, displayValue);
+                leftOperand = displayValue;
                 break;
             default:
                 keySequenceError();
@@ -144,7 +169,7 @@ public class Engine {
         if(lastOperator != ' ')
             calculateResult();
         else
-            leftOperand = valueOnScreen;
+            leftOperand = displayValue;
 
         lastOperator = operator;
     }
@@ -163,7 +188,11 @@ public class Engine {
     public void clear() {
         lastOperator = ' ';
         state = State.DONE;
-        valueOnScreen = 0;
+        displayValue = 0;
+    }
+
+    public void setFractionDigitsNumber(int digits) {
+        fractionDigitsNumber = digits;
     }
 
     /**
@@ -180,6 +209,18 @@ public class Engine {
         transitions.put(Input.EQUALS, State.DONE, State.ERROR);
         transitions.put(Input.EQUALS, State.BUILDING_OPERAND, State.DONE);
         transitions.put(Input.EQUALS, State.OPERATOR, State.ERROR);
+    }
+
+    public String getTitle() {
+        return "Calculatrice";
+    }
+
+    public String getAuthor() {
+        return "Student";
+    }
+
+    public String getVersion() {
+        return "Version 1.0";
     }
 
 }

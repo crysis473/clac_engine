@@ -1,6 +1,6 @@
-package com.calculator.StateMachineComponents;
+package com.calculator.stateMachineComponents;
 
-import com.calculator.Engine;
+import com.calculator.engine.Engine;
 
 /**
  * Created by user on 25/05/2015.
@@ -46,6 +46,5 @@ public class DoubleKey {
     public int hashCode() {
         return input.hashCode() + state.hashCode();
     }
-
 
 }
