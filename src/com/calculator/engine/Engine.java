@@ -30,13 +30,15 @@ public class Engine {
     private Transition transitions;
     // The non zero decimal digits number to be printed after the decimal point.
     private int fractionDigitsNumber;
+    // The string after the decimal point.
+    private String afterDecimal = "";
     // Enumeration of the states of the engine.
     public enum State {
-        DONE, BUILDING_OPERAND, OPERATOR, ERROR;
+        DONE, BUILDING_OPERAND, OPERATOR, ERROR, BUILDING_DECIMAL;
     }
     // Enumeration of the type of input symbols.
     public enum Input {
-        NUMBER, OPERATION, EQUALS;
+        NUMBER, OPERATION, EQUALS, DECIMAL_SEPARATOR;
     }
 
     /**
@@ -56,8 +58,14 @@ public class Engine {
         /* If diplayValue can be cast to an integer without loss of precision,
         we print the integer value without the decimal part.
          */
-        if(displayValue == (int)displayValue)
-            return "" + (int)displayValue;
+
+        if(state == State.BUILDING_DECIMAL) {
+            //final int d = (int)displayValue;
+            return  afterDecimal;
+        }
+
+        /*if(displayValue == (int)displayValue)
+            return "" + (int)displayValue + lastOperator;*/
 
         /* If the diplayValue cannot be cast into an integer without loss of precision,
         we print the double value with the specified number of fractions digits.
@@ -65,16 +73,49 @@ public class Engine {
         DecimalFormat df = new DecimalFormat();
         df.setMinimumFractionDigits(fractionDigitsNumber);
         df.setMaximumFractionDigits(fractionDigitsNumber);
-
         String str = df.format(displayValue).replaceAll(",",".");
-        return str;
+        if(state == State.OPERATOR)
+            return str + lastOperator;
+        else
+            return str;
+    }
+
+    /**
+     * Number button pressed.
+     * @param number The on digit number related to the pressed button.
+     */
+    public void numberPressed(int number) {
+        if(state != (State.OPERATOR)) {
+            if(state.equals(State.DONE))
+                clear();
+            if(state != State.BUILDING_DECIMAL){
+                // Insert the digit.
+                displayValue = displayValue *10 + number;
+            }
+            else{
+                afterDecimal += number;
+                displayValue = Double.valueOf(afterDecimal);
+                System.out.println(displayValue);
+            }
+        }
+        else {
+            displayValue = number;
+        }
+        state = transitions.get(Input.NUMBER, state);
+    }
+
+    public void decimalSeparatorPressed() {
+        afterDecimal = (int)displayValue + ".";
+        if(state != State.BUILDING_OPERAND)
+            keySequenceError();
+        state = transitions.get(Input.DECIMAL_SEPARATOR, state);
     }
 
     /**
      * The '+' button was pressed.
      */
     public void plus() {
-        applyOperator('+');
+            applyOperator('+');
     }
 
     /**
@@ -112,44 +153,29 @@ public class Engine {
             keySequenceError();
     }
 
-    /**
-     * Number button pressed.
-     * @param number The on digit number related to the pressed button.
-     */
-    public void numberPressed(int number) {
-        if(!state.equals(State.OPERATOR)) {
-            if(state.equals(State.DONE))
-                clear();
-            // Insert the digit.
-            displayValue = displayValue *10 + number;
-        }
-        else {
-            displayValue = number;
-        }
-        state = transitions.get(Input.NUMBER, state);
-    }
-
     private void calculateResult() {
-        switch(lastOperator) {
-            case '+':
-                displayValue = MathematicalUnit.addition(leftOperand, displayValue);
-                leftOperand = displayValue;
-                break;
-            case '-':
-                displayValue = MathematicalUnit.substraction(leftOperand, displayValue);
-                leftOperand = displayValue;
-                break;
-            case '*':
-                displayValue = MathematicalUnit.multiplication(leftOperand, displayValue);
-                leftOperand = displayValue;
-                break;
-            case '/':
-                displayValue = MathematicalUnit.division(leftOperand, displayValue);
-                leftOperand = displayValue;
-                break;
-            default:
-                keySequenceError();
-                break;
+        if(state != State.OPERATOR) {
+            switch(lastOperator) {
+                case '+':
+                    displayValue = MathematicalUnit.addition(leftOperand, displayValue);
+                    leftOperand = displayValue;
+                    break;
+                case '-':
+                    displayValue = MathematicalUnit.substraction(leftOperand, displayValue);
+                    leftOperand = displayValue;
+                    break;
+                case '*':
+                    displayValue = MathematicalUnit.multiplication(leftOperand, displayValue);
+                    leftOperand = displayValue;
+                    break;
+                case '/':
+                    displayValue = MathematicalUnit.division(leftOperand, displayValue);
+                    leftOperand = displayValue;
+                    break;
+                default:
+                    keySequenceError();
+                    break;
+            }
         }
     }
 
@@ -159,9 +185,8 @@ public class Engine {
      */
     private void applyOperator(char operator) {
         // State transition when applying an operator.
-        state = transitions.get(Input.OPERATION, state);
 
-        if(state.equals(State.ERROR)) {
+        if(state == State.ERROR) {
             keySequenceError();
             return;
         }
@@ -172,6 +197,7 @@ public class Engine {
             leftOperand = displayValue;
 
         lastOperator = operator;
+        state = transitions.get(Input.OPERATION, state);
     }
 
     /**
@@ -189,6 +215,7 @@ public class Engine {
         lastOperator = ' ';
         state = State.DONE;
         displayValue = 0;
+        afterDecimal = "";
     }
 
     public void setFractionDigitsNumber(int digits) {
@@ -202,13 +229,21 @@ public class Engine {
         transitions = new Transition();
         transitions.put(Input.NUMBER, State.DONE, State.BUILDING_OPERAND);
         transitions.put(Input.NUMBER, State.BUILDING_OPERAND, State.BUILDING_OPERAND);
+        transitions.put(Input.NUMBER, State.BUILDING_DECIMAL, State.BUILDING_DECIMAL);
         transitions.put(Input.NUMBER, State.OPERATOR, State.BUILDING_OPERAND);
         transitions.put(Input.OPERATION, State.DONE, State.ERROR);
         transitions.put(Input.OPERATION, State.BUILDING_OPERAND, State.OPERATOR);
-        transitions.put(Input.OPERATION, State.OPERATOR, State.ERROR);
+        transitions.put(Input.OPERATION, State.BUILDING_DECIMAL, State.OPERATOR);
+        transitions.put(Input.OPERATION, State.OPERATOR, State.OPERATOR);
         transitions.put(Input.EQUALS, State.DONE, State.ERROR);
         transitions.put(Input.EQUALS, State.BUILDING_OPERAND, State.DONE);
         transitions.put(Input.EQUALS, State.OPERATOR, State.ERROR);
+        transitions.put(Input.EQUALS, State.BUILDING_DECIMAL, State.DONE);
+        transitions.put(Input.DECIMAL_SEPARATOR, State.OPERATOR, State.ERROR);
+        transitions.put(Input.DECIMAL_SEPARATOR, State.BUILDING_DECIMAL, State.ERROR);
+        transitions.put(Input.DECIMAL_SEPARATOR, State.BUILDING_OPERAND, State.BUILDING_DECIMAL);
+        transitions.put(Input.DECIMAL_SEPARATOR, State.DONE, State.DONE);
+        transitions.put(Input.DECIMAL_SEPARATOR, State.ERROR, State.DONE);
     }
 
     public String getTitle() {
