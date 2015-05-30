@@ -63,6 +63,12 @@ public class Engine {
             //final int d = (int)displayValue;
             return  afterDecimal;
         }
+       if(displayValue == (int)displayValue) {
+            if(state == State.OPERATOR)
+                return "" + (int)displayValue + lastOperator;
+            else
+                return ""+(int)displayValue;
+        }
 
         /*if(displayValue == (int)displayValue)
             return "" + (int)displayValue + lastOperator;*/
