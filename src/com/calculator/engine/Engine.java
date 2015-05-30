@@ -113,7 +113,7 @@ public class Engine {
     public void decimalSeparatorPressed() {
         afterDecimal = (int)displayValue + ".";
         if(state != State.BUILDING_OPERAND)
-            keySequenceError();
+            error();
         state = transitions.get(Input.DECIMAL_SEPARATOR, state);
     }
 
@@ -156,7 +156,7 @@ public class Engine {
             calculateResult();
             lastOperator = ' ';
         } else
-            keySequenceError();
+            error();
     }
 
     private void calculateResult() {
@@ -179,7 +179,7 @@ public class Engine {
                     leftOperand = displayValue;
                     break;
                 default:
-                    keySequenceError();
+                    error();
                     break;
             }
         }
@@ -192,8 +192,8 @@ public class Engine {
     private void applyOperator(char operator) {
         // State transition when applying an operator.
 
-        if(state == State.ERROR) {
-            keySequenceError();
+        if(state == State.ERROR || state == State.DONE) {
+            error();
             return;
         }
 
@@ -209,8 +209,8 @@ public class Engine {
     /**
      * Prints an error message and resets the engine.
      */
-    private void keySequenceError() {
-        System.out.println("Key sequence error.");
+    private void error() {
+        System.out.println("An error occured");
         clear();
     }
 
@@ -257,7 +257,7 @@ public class Engine {
     }
 
     public String getAuthor() {
-        return "Student";
+        return "STUDENTS";
     }
 
     public String getVersion() {
